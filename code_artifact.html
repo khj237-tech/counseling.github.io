@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음샘 - 따뜻한 마음 상담소</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Emotion Report -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        sage: {
+                            50: '#f4f7f4',
+                            100: '#e3eae3',
+                            200: '#c7d6c8',
+                            300: '#a3bca5',
+                            400: '#84a686',
+                            500: '#688e6b',
+                            600: '#527455',
+                            700: '#425d45',
+                            800: '#354b38',
+                            900: '#2c3e2f'
+                        },
+                        amber: {
+                            warm: '#fff8f0',
+                            accent: '#f59e0b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'sans-serif'],
+                        comfort: ['"Gowun Dodum"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .font-comfort {
+            font-family: 'Gowun Dodum', serif;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(104, 142, 107, 0.4);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(104, 142, 107, 0.7);
+        }
+        /* Breathing animation */
+        @keyframes breatheCircle {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.6); opacity: 0.35; }
+        }
+        .animate-breathe {
+            animation: breatheCircle 8s ease-in-out infinite;
+        }
+        /* Fade in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-amber-warm dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col transition-colors duration-300">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-b border-sage-100 dark:border-slate-700 transition-colors shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('chat')">
+                <div class="w-10 h-10 rounded-full bg-sage-500 flex items-center justify-center text-white text-xl shadow-md">
+                    <i class="fa-solid fa-seedling"></i>
+                </div>
+                <div>
+                    <h1 class="font-comfort font-bold text-lg text-sage-700 dark:text-sage-200 leading-none">마음샘</h1>
+                    <span class="text-xs text-slate-400 dark:text-slate-400">따뜻한 마음 상담소</span>
+                </div>
+            </div>
+
+            <!-- Global Action Buttons -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button onclick="openSafetyModal()" class="px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-300 text-xs sm:text-sm font-medium hover:bg-rose-100 dark:hover:bg-rose-900/60 transition flex items-center space-x-1.5 border border-rose-200 dark:border-rose-800">
+                    <i class="fa-solid fa-heart-pulse text-rose-500 animate-pulse"></i>
+                    <span>긴급 상담 안내</span>
+                </button>
+                
+                <button onclick="toggleDarkMode()" id="themeBtn" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="다크모드 전환">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <nav class="max-w-5xl mx-auto px-4 flex space-x-1 sm:space-x-4 border-t border-slate-100 dark:border-slate-700/50 text-sm overflow-x-auto">
+            <button onclick="switchTab('chat')" id="nav-chat" class="tab-btn active py-3 px-3 sm:px-4 font-medium border-b-2 border-sage-500 text-sage-700 dark:text-sage-300 flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-comments"></i>
+                <span>고민 대화</span>
+            </button>
+            <button onclick="switchTab('solution')" id="nav-solution" class="tab-btn py-3 px-3 sm:px-4 font-medium text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-700 dark:hover:text-slate-200 flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-compass text-amber-500"></i>
+                <span>맞춤 솔루션</span>
+            </button>
+            <button onclick="switchTab('gallery')" id="nav-gallery" class="tab-btn py-3 px-3 sm:px-4 font-medium text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-700 dark:hover:text-slate-200 flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-hand-holding-heart"></i>
+                <span>공감 갤러리</span>
+            </button>
+            <button onclick="switchTab('report')" id="nav-report" class="tab-btn py-3 px-3 sm:px-4 font-medium text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-700 dark:hover:text-slate-200 flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-calendar-check"></i>
+                <span>마음 리포트</span>
+            </button>
+            <button onclick="switchTab('healing')" id="nav-healing" class="tab-btn py-3 px-3 sm:px-4 font-medium text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-700 dark:hover:text-slate-200 flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-spa text-emerald-500"></i>
+                <span>힐링 존</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6">
+
+        <!-- TAB 1: AI COUNSELOR CHAT -->
+        <section id="tab-chat" class="tab-content block space-y-4">
+            
+            <!-- Persona & Tone Config Bar -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-sage-100 dark:border-slate-700 flex flex-col gap-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-sage-100 dark:bg-sage-900/60 text-sage-700 dark:text-sage-300">상담 파트너</span>
+                        <span class="text-sm font-medium text-slate-600 dark:text-slate-300">누구와 이야기해볼까요?</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="selectPersona('mentor')" id="persona-mentor" class="persona-btn active px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border-2 border-sage-500 bg-sage-50 dark:bg-sage-950/40 text-sage-700 dark:text-sage-300 flex items-center justify-center space-x-1.5 transition">
+                            <span>🌿</span>
+                            <span>마음이 (멘토)</span>
+                        </button>
+                        <button onclick="selectPersona('friend')" id="persona-friend" class="persona-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center space-x-1.5 hover:border-slate-300 transition">
+                            <span>☕</span>
+                            <span>모카 (친구)</span>
+                        </button>
+                        <button onclick="selectPersona('wise')" id="persona-wise" class="persona-btn px-3 py-2 rounded-xl text-xs sm:text-sm font-medium border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center space-x-1.5 hover:border-slate-300 transition">
+                            <span>🦉</span>
+                            <span>솔로몬 (조언자)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Speech Style / Tone Mode Selector -->
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div class="flex items-center space-x-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+                        <span>말투 스타일:</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5 overflow-x-auto text-xs">
+                        <button onclick="selectTone('polite')" id="tone-polite" class="tone-btn active px-3 py-1.5 rounded-xl border border-sage-500 bg-sage-50 dark:bg-sage-950/40 text-sage-700 dark:text-sage-300 font-medium transition flex items-center space-x-1 whitespace-nowrap">
+                            <span>🌸 정중한 존댓말</span>
+                        </button>
+                        <button onclick="selectTone('informal')" id="tone-informal" class="tone-btn px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium hover:border-slate-300 transition flex items-center space-x-1 whitespace-nowrap">
+                            <span>💬 따뜻한 반말</span>
+                        </button>
+                        <button onclick="selectTone('empathy')" id="tone-empathy" class="tone-btn px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium hover:border-slate-300 transition flex items-center space-x-1 whitespace-nowrap">
+                            <span>💖 무한 토닥토닥</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Window Container -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sage-100 dark:border-slate-700 flex flex-col h-[520px] overflow-hidden relative">
+                
+                <!-- Messages List -->
+                <div id="chatMessages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
+                    <!-- Initial Greeting Message -->
+                    <div class="flex items-start space-x-3 animate-fadeIn">
+                        <div class="w-10 h-10 rounded-full bg-sage-100 dark:bg-sage-900/80 flex items-center justify-center text-sage-600 dark:text-sage-300 text-lg flex-shrink-0 shadow-xs">
+                            <span id="personaIcon">🌿</span>
+                        </div>
+                        <div class="max-w-[85%] sm:max-w-[75%] space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span id="personaName" class="text-xs font-bold text-slate-600 dark:text-slate-300">마음이</span>
+                                <span class="text-[10px] text-slate-400">방금 전</span>
+                            </div>
+                            <div class="bg-sage-50 dark:bg-slate-700/60 p-3.5 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-comfort shadow-xs">
+                                안녕하세요. 오늘 마음속에 어떤 이야기가 무겁게 자리 잡고 있나요? 편안하게 당신의 이야기를 들려주세요. 마음샘은 항상 당신의 편입니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Mood Tags Container -->
+                <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/50 flex items-center space-x-2 overflow-x-auto text-xs">
+                    <span class="text-slate-400 font-medium flex-shrink-0">
+                        <i class="fa-solid fa-tags text-sage-500 mr-1"></i>현재 감정:
+                    </span>
+                    <button onclick="toggleMoodTag('우울', this)" class="mood-tag px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 transition flex-shrink-0">🌧️ 우울</button>
+                    <button onclick="toggleMoodTag('불안', this)" class="mood-tag px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 transition flex-shrink-0">😰 불안</button>
+                    <button onclick="toggleMoodTag('답답함', this)" class="mood-tag px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 transition flex-shrink-0">💨 답답함</button>
+                    <button onclick="toggleMoodTag('번아웃', this)" class="mood-tag px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 transition flex-shrink-0">🔋 번아웃</button>
+                    <button onclick="toggleMoodTag('외로움', this)" class="mood-tag px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 transition flex-shrink-0">🎈 외로움</button>
+                </div>
+
+                <!-- Input Box -->
+                <div class="p-3 sm:p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+                    <!-- Preset Suggestions Chips -->
+                    <div class="flex items-center space-x-2 overflow-x-auto pb-2 mb-1 text-xs">
+                        <button onclick="quickInput('요즘 이유 없이 마음이 자꾸 무겁고 우울해요.')" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-sage-100 dark:hover:bg-slate-600 transition whitespace-nowrap">
+                            💡 자꾸 마음이 무거워요
+                        </button>
+                        <button onclick="quickInput('사람과의 관계에서 받은 상처 때문에 힘들어요.')" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-sage-100 dark:hover:bg-slate-600 transition whitespace-nowrap">
+                            💡 인간관계 상처
+                        </button>
+                        <button onclick="quickInput('미래에 대한 불안감 때문에 잠이 오질 않아요.')" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-sage-100 dark:hover:bg-slate-600 transition whitespace-nowrap">
+                            💡 미래에 대한 불안
+                        </button>
+                    </div>
+
+                    <form onsubmit="sendMessage(event)" class="flex items-center space-x-2">
+                        <input type="text" id="userInput" placeholder="마음속 이야기를 여기에 편하게 적어주세요..." 
+                               class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sage-500 transition">
+                        <button type="submit" id="sendBtn" class="px-4 py-3 bg-sage-500 hover:bg-sage-600 text-white rounded-xl text-sm font-medium transition flex items-center justify-center space-x-1 shadow-sm">
+                            <span>전송</span>
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: AI SOLUTION COMPASS -->
+        <section id="tab-solution" class="tab-content hidden space-y-6">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-sage-100 dark:border-slate-700 space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center text-amber-500 text-xl">
+                        <i class="fa-solid fa-compass"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-comfort font-bold text-lg text-slate-800 dark:text-slate-100">맞춤 솔루션 나침반</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">복잡한 고민을 해결하기 위한 단계별 행동 지침과 관점 전환 가이드를 제공합니다.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">구체적으로 해결하고 싶은 고민 상황이 있으신가요?</label>
+                    <textarea id="solutionInput" rows="3" placeholder="예: 직장에서 직속 상사와의 소통이 너무 힘들어서 매일 출근이 두렵습니다. 어떻게 마음을 다잡고 상황을 대처해야 할까요?"
+                              class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3.5 focus:outline-none focus:ring-2 focus:ring-sage-500 transition"></textarea>
+                    
+                    <button onclick="generateSolution()" id="genSolutionBtn" class="w-full py-3 bg-sage-500 hover:bg-sage-600 text-white rounded-xl font-medium text-sm transition shadow-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>맞춤 3단계 솔루션 생성하기</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Solution Result Cards -->
+            <div id="solutionResult" class="hidden space-y-4">
+                <div class="bg-amber-warm dark:bg-slate-800/80 rounded-2xl p-5 border border-amber-200 dark:border-slate-700">
+                    <h3 class="font-bold text-amber-800 dark:text-amber-400 text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span>마음 다잡기 (Mindset Shift)</span>
+                    </h3>
+                    <p id="solutionMindset" class="text-sm text-slate-700 dark:text-slate-300 mt-2 font-comfort leading-relaxed"></p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="solutionSteps">
+                    <!-- Step 1, 2, 3 generated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: EMPATHY GALLERY -->
+        <section id="tab-gallery" class="tab-content hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="font-comfort font-bold text-xl text-slate-800 dark:text-slate-100">공감 & 위로 갤러리</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">지친 당신을 다독여주는 따뜻한 글귀와 마음 카드를 만나보세요.</p>
+                </div>
+                <button onclick="generateEmpathyCard()" class="px-4 py-2 bg-sage-500 hover:bg-sage-600 text-white text-xs font-medium rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span>위로 카드 새로고침</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="galleryCards">
+                <!-- Preset / Generated Comfort Cards -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-sage-100 dark:border-slate-700 space-y-4 hover:shadow-md transition">
+                    <div class="text-xs text-sage-600 dark:text-sage-400 font-semibold flex items-center justify-between">
+                        <span>🌱 오늘의 한 줄</span>
+                        <i class="fa-solid fa-quote-right text-sage-300"></i>
+                    </div>
+                    <p class="font-comfort text-base text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                        "지금 당장 모든 것을 해결하지 않아도 괜찮아요. 한 걸음씩 쉬어가며 걷는 것도 훌륭한 나아감입니다."
+                    </p>
+                    <div class="pt-3 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-400 flex justify-between items-center">
+                        <span>#지친_당신에게</span>
+                        <button onclick="copyQuote(this)" class="hover:text-sage-600 transition"><i class="fa-regular fa-copy mr-1"></i>복사</button>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-sage-100 dark:border-slate-700 space-y-4 hover:shadow-md transition">
+                    <div class="text-xs text-amber-600 dark:text-amber-400 font-semibold flex items-center justify-between">
+                        <span>☕ 토닥토닥 레터</span>
+                        <i class="fa-solid fa-mug-hot text-amber-300"></i>
+                    </div>
+                    <p class="font-comfort text-base text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                        "남들의 속도에 맞춰 달리지 않아도 됩니다. 당신만의 정원에는 당신만의 시간에 꽃이 필 테니까요."
+                    </p>
+                    <div class="pt-3 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-400 flex justify-between items-center">
+                        <span>#자존감_회복</span>
+                        <button onclick="copyQuote(this)" class="hover:text-sage-600 transition"><i class="fa-regular fa-copy mr-1"></i>복사</button>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-sage-100 dark:border-slate-700 space-y-4 hover:shadow-md transition">
+                    <div class="text-xs text-sky-600 dark:text-sky-400 font-semibold flex items-center justify-between">
+                        <span>🌊 마음의 안정</span>
+                        <i class="fa-solid fa-water text-sky-300"></i>
+                    </div>
+                    <p class="font-comfort text-base text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                        "파도가 밀려오듯 감정도 왔다가 결국 지나갑니다. 이 불안함도 곧 조용히 흘러갈 것입니다."
+                    </p>
+                    <div class="pt-3 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-400 flex justify-between items-center">
+                        <span>#불안하무너뜨리기</span>
+                        <button onclick="copyQuote(this)" class="hover:text-sage-600 transition"><i class="fa-regular fa-copy mr-1"></i>복사</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: EMOTION REPORT & TRACKER -->
+        <section id="tab-report" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Emotion Input Form -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-sage-100 dark:border-slate-700 space-y-4">
+                    <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-pen-to-square text-sage-500"></i>
+                        <span>오늘의 마음 기록하기</span>
+                    </h3>
+
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="block mb-1 font-medium text-slate-600 dark:text-slate-300">주요 감정 선택</label>
+                            <select id="moodSelect" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                                <option value="5">😊 평온 / 행복 (5점)</option>
+                                <option value="4" selected>🙂 무난함 / 보통 (4점)</option>
+                                <option value="3">😐 약간 답답함 / 걱정 (3점)</option>
+                                <option value="2">🌧️ 우울 / 슬픔 (2점)</option>
+                                <option value="1">⚡ 심한 불안 / 화남 (1점)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block mb-1 font-medium text-slate-600 dark:text-slate-300">한 줄 마음에 메모</label>
+                            <input type="text" id="moodNote" placeholder="예: 오늘 회의 때문에 조금 긴장되었지만 잘 끝났다." 
+                                   class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                        </div>
+
+                        <button onclick="logMood()" class="w-full py-2.5 bg-sage-500 hover:bg-sage-600 text-white font-medium rounded-xl transition text-xs shadow-sm">
+                            기록 저장하기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Emotion Trend Chart -->
+                <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-sage-100 dark:border-slate-700 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm flex items-center space-x-2">
+                            <i class="fa-chart-line fa-solid text-sage-500"></i>
+                            <span>주간 마음 기온 변화</span>
+                        </h3>
+                        <span class="text-xs text-slate-400">최근 7일 기록</span>
+                    </div>
+
+                    <div class="h-56 relative w-full">
+                        <canvas id="emotionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emotion Insights Summary -->
+            <div class="bg-sage-50 dark:bg-slate-800/60 rounded-2xl p-5 border border-sage-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-full bg-sage-500 text-white flex items-center justify-center text-xl flex-shrink-0">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-sage-800 dark:text-sage-200">AI 마음 분석 리포트</h4>
+                        <p id="emotionInsightText" class="text-xs text-slate-600 dark:text-slate-300 font-comfort mt-0.5">
+                            최근 7일간의 마음 기온은 대체로 안정적입니다. 중간 중간 답답함이 찾아올 땐 힐링존의 호흡법을 활용해보세요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: HEALING ZONE -->
+        <section id="tab-healing" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- 4-7-8 Breathing Technique Interactive Tool -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-sage-100 dark:border-slate-700 text-center flex flex-col items-center justify-between min-h-[340px]">
+                    <div>
+                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Mindfulness Exercise</span>
+                        <h3 class="font-comfort font-bold text-lg text-slate-800 dark:text-slate-100 mt-1">4-7-8 자율신경 이완 호흡</h3>
+                        <p class="text-xs text-slate-400 mt-1">4초 들숨, 7초 멈춤, 8초 날숨으로 부교감신경을 활성화하세요.</p>
+                    </div>
+
+                    <!-- Breathing Animation Circle Container -->
+                    <div class="relative my-6 flex items-center justify-center">
+                        <div id="breatheBg" class="w-36 h-36 rounded-full bg-sage-200 dark:bg-sage-900/60 transition-all duration-1000 flex items-center justify-center">
+                            <div class="w-24 h-24 rounded-full bg-sage-500 flex items-center justify-center text-white shadow-lg">
+                                <span id="breatheStatus" class="font-comfort font-bold text-sm">준비</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full flex items-center justify-center space-x-3">
+                        <button onclick="toggleBreathing()" id="breatheStartBtn" class="px-6 py-2.5 bg-sage-500 hover:bg-sage-600 text-white text-xs font-semibold rounded-xl transition shadow-sm">
+                            호흡 가이드 시작
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 5-4-3-2-1 Grounding Technique -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-sage-100 dark:border-slate-700 flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Grounding Technique</span>
+                        <h3 class="font-comfort font-bold text-lg text-slate-800 dark:text-slate-100 mt-1">5-4-3-2-1 감각 그라운딩</h3>
+                        <p class="text-xs text-slate-400 mt-1">과도한 생각과 불안에서 벗어나 '지금 여기' 현실에 집중하는 방법입니다.</p>
+                    </div>
+
+                    <div class="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700 flex items-center space-x-3">
+                            <span class="font-bold text-sage-600 text-sm">5</span>
+                            <span>눈에 보이는 **5가지 사물**을 천천히 찾아보세요.</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700 flex items-center space-x-3">
+                            <span class="font-bold text-sage-600 text-sm">4</span>
+                            <span>손 끝이나 몸으로 느껴지는 **4가지 감각**에 집중해보세요.</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700 flex items-center space-x-3">
+                            <span class="font-bold text-sage-600 text-sm">3</span>
+                            <span>지금 귀에 들리는 **3가지 소리**를 가만히 들어보세요.</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700 flex items-center space-x-3">
+                            <span class="font-bold text-sage-600 text-sm">2</span>
+                            <span>주변에서 느껴지는 **2가지 냄새**를 맡아보세요.</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700 flex items-center space-x-3">
+                            <span class="font-bold text-sage-600 text-sm">1</span>
+                            <span>입안에 남은 **1가지 맛**에 집중해봅니다.</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Emergency Safety Helpline Modal -->
+    <div id="safetyModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl border border-rose-100 dark:border-rose-950 animate-fadeIn">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                <div class="flex items-center space-x-2 text-rose-600 dark:text-rose-400">
+                    <i class="fa-solid fa-heart-pulse text-xl"></i>
+                    <h3 class="font-bold text-base">24시간 긴급 마음 상담 전화</h3>
+                </div>
+                <button onclick="closeSafetyModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-comfort">
+                혼자 견디기 힘든 순간이거나 전문적인 즉각 상담이 필요하시다면, 언제든 주저하지 마시고 아래 무료 전문 상담 전화로 연락해 주세요.
+            </p>
+
+            <div class="space-y-3">
+                <a href="tel:1393" class="flex items-center justify-between p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 border border-rose-200 dark:border-rose-900 transition group">
+                    <div>
+                        <span class="block text-xs font-semibold text-rose-700 dark:text-rose-300">자살예방 상담전화</span>
+                        <span class="text-lg font-bold text-rose-600 dark:text-rose-400">국번없이 1393</span>
+                    </div>
+                    <span class="px-3 py-1 bg-rose-600 text-white text-xs font-medium rounded-xl group-hover:bg-rose-700 transition">전화 연결</span>
+                </a>
+
+                <a href="tel:1577-0199" class="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 border border-amber-200 dark:border-amber-900 transition group">
+                    <div>
+                        <span class="block text-xs font-semibold text-amber-800 dark:text-amber-300">정신건강 상담전화</span>
+                        <span class="text-lg font-bold text-amber-600 dark:text-amber-400">1577-0199</span>
+                    </div>
+                    <span class="px-3 py-1 bg-amber-600 text-white text-xs font-medium rounded-xl group-hover:bg-amber-700 transition">전화 연결</span>
+                </a>
+
+                <a href="tel:1388" class="flex items-center justify-between p-3.5 rounded-2xl bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 border border-sky-200 dark:border-sky-900 transition group">
+                    <div>
+                        <span class="block text-xs font-semibold text-sky-800 dark:text-sky-300">청소년 전화</span>
+                        <span class="text-lg font-bold text-sky-600 dark:text-sky-400">국번없이 1388</span>
+                    </div>
+                    <span class="px-3 py-1 bg-sky-600 text-white text-xs font-medium rounded-xl group-hover:bg-sky-700 transition">전화 연결</span>
+                </a>
+            </div>
+
+            <div class="text-center pt-2">
+                <button onclick="closeSafetyModal()" class="w-full py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-xl transition">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-400">
+        <div class="max-w-5xl mx-auto px-4 space-y-1">
+            <p>© 2026 마음샘 - 따뜻한 마음 상담소. All rights reserved.</p>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500">본 서비스는 심리적 안정과 조언을 위한 AI 상담 도구이며 의학적 진단을 대체하지 않습니다.</p>
+        </div>
+    </footer>
+
+    <!-- Application Logic Script -->
+    <script>
+        // App State
+        let currentPersona = 'mentor'; // 'mentor', 'friend', 'wise'
+        let currentTone = 'polite'; // 'polite', 'informal', 'empathy'
+        let selectedMoodTags = [];
+        let isBreathingRunning = false;
+        let breatheInterval = null;
+        let emotionChartInstance = null;
+
+        // User emotion log state
+        let emotionLogs = [
+            { day: '월', score: 4, note: '평범한 하루' },
+            { day: '화', score: 3, note: '업무로 약간 지침' },
+            { day: '수', score: 2, note: '마음이 많이 가라앉음' },
+            { day: '목', score: 4, note: '친구와의 대화로 회복' },
+            { day: '금', score: 5, note: '기분 좋은 주말 시작' },
+            { day: '토', score: 4, note: '편안한 휴식' },
+            { day: '일', score: 4, note: '내일을 준비하는 하루' },
+        ];
+
+        // Persona Configs
+        const personas = {
+            mentor: { name: '마음이', icon: '🌿', role: '따뜻한 온기와 포용력을 가진 멘토' },
+            friend: { name: '모카', icon: '☕', role: '친근하게 공감하고 이야기 나눠주는 친구' },
+            wise: { name: '솔로몬', icon: '🦉', role: '지혜롭고 명쾌하게 생각을 정리해주는 조언자' }
+        };
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            initEmotionChart();
+        });
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-sage-500', 'text-sage-700', 'dark:text-sage-300');
+                btn.classList.add('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'border-sage-500', 'text-sage-700', 'dark:text-sage-300');
+                activeBtn.classList.remove('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+            }
+        }
+
+        // Persona Switcher
+        function selectPersona(personaKey) {
+            currentPersona = personaKey;
+            document.querySelectorAll('.persona-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-sage-500', 'bg-sage-50', 'dark:bg-sage-950/40', 'text-sage-700', 'dark:text-sage-300');
+                btn.classList.add('border-slate-200', 'dark:border-slate-700', 'bg-white', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+            });
+
+            const activeBtn = document.getElementById(`persona-${personaKey}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'border-sage-500', 'bg-sage-50', 'dark:bg-sage-950/40', 'text-sage-700', 'dark:text-sage-300');
+            }
+
+            document.getElementById('personaName').innerText = personas[personaKey].name;
+            document.getElementById('personaIcon').innerText = personas[personaKey].icon;
+        }
+
+        // Tone Switcher
+        function selectTone(toneKey) {
+            currentTone = toneKey;
+            document.querySelectorAll('.tone-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-sage-500', 'bg-sage-50', 'dark:bg-sage-950/40', 'text-sage-700', 'dark:text-sage-300');
+                btn.classList.add('border-slate-200', 'dark:border-slate-700', 'bg-white', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+            });
+
+            const activeBtn = document.getElementById(`tone-${toneKey}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'border-sage-500', 'bg-sage-50', 'dark:bg-sage-950/40', 'text-sage-700', 'dark:text-sage-300');
+            }
+        }
+
+        // Mood Tag Toggle
+        function toggleMoodTag(tag, element) {
+            if (selectedMoodTags.includes(tag)) {
+                selectedMoodTags = selectedMoodTags.filter(t => t !== tag);
+                element.classList.remove('bg-sage-500', 'text-white', 'border-sage-500');
+                element.classList.add('bg-white', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+            } else {
+                selectedMoodTags.push(tag);
+                element.classList.add('bg-sage-500', 'text-white', 'border-sage-500');
+                element.classList.remove('bg-white', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+            }
+        }
+
+        // Quick Input Chips
+        function quickInput(text) {
+            document.getElementById('userInput').value = text;
+            document.getElementById('userInput').focus();
+        }
+
+        // Send Chat Message
+        async function sendMessage(e) {
+            e.preventDefault();
+            const inputEl = document.getElementById('userInput');
+            const messageText = inputEl.value.trim();
+            if (!messageText) return;
+
+            // Clear Input
+            inputEl.value = '';
+
+            // Append User Message UI
+            appendUserMessage(messageText);
+
+            // Append Loading Indicator
+            const loadingId = appendLoadingIndicator();
+
+            try {
+                // Call Gemini Flash API for Response
+                const aiResponse = await callGeminiChatAPI(messageText);
+                removeLoadingIndicator(loadingId);
+                appendAiMessage(aiResponse);
+            } catch (err) {
+                console.error("API error, falling back to empathetic response:", err);
+                removeLoadingIndicator(loadingId);
+                const fallbackMsg = getFallbackResponse(messageText);
+                appendAiMessage(fallbackMsg);
+            }
+        }
+
+        // Append User Message to UI
+        function appendUserMessage(text) {
+            const chatMessages = document.getElementById('chatMessages');
+            const userHtml = `
+                <div class="flex items-start justify-end space-x-3 animate-fadeIn">
+                    <div class="max-w-[85%] sm:max-w-[75%] space-y-1 text-right">
+                        <div class="flex items-center justify-end space-x-2">
+                            <span class="text-[10px] text-slate-400">방금 전</span>
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-300">나</span>
+                        </div>
+                        <div class="bg-sage-500 text-white p-3.5 rounded-2xl rounded-tr-none text-sm leading-relaxed text-left font-comfort shadow-xs inline-block">
+                            ${escapeHtml(text)}
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatMessages.insertAdjacentHTML('beforeend', userHtml);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Append AI Message to UI
+        function appendAiMessage(text) {
+            const chatMessages = document.getElementById('chatMessages');
+            const persona = personas[currentPersona];
+            const aiHtml = `
+                <div class="flex items-start space-x-3 animate-fadeIn">
+                    <div class="w-10 h-10 rounded-full bg-sage-100 dark:bg-sage-900/80 flex items-center justify-center text-sage-600 dark:text-sage-300 text-lg flex-shrink-0 shadow-xs">
+                        <span>${persona.icon}</span>
+                    </div>
+                    <div class="max-w-[85%] sm:max-w-[75%] space-y-1">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-300">${persona.name}</span>
+                            <span class="text-[10px] text-slate-400">방금 전</span>
+                        </div>
+                        <div class="bg-sage-50 dark:bg-slate-700/60 p-3.5 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-comfort shadow-xs whitespace-pre-line">
+                            ${escapeHtml(text)}
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatMessages.insertAdjacentHTML('beforeend', aiHtml);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Loading Indicator Helper
+        function appendLoadingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const loadingId = 'loading-' + Date.now();
+            const persona = personas[currentPersona];
+            const loadingHtml = `
+                <div id="${loadingId}" class="flex items-start space-x-3 animate-fadeIn">
+                    <div class="w-10 h-10 rounded-full bg-sage-100 dark:bg-sage-900/80 flex items-center justify-center text-sage-600 dark:text-sage-300 text-lg flex-shrink-0 shadow-xs">
+                        <span>${persona.icon}</span>
+                    </div>
+                    <div class="bg-sage-50 dark:bg-slate-700/60 p-3.5 rounded-2xl rounded-tl-none text-sm text-slate-500 dark:text-slate-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-circle-notch animate-spin text-sage-500"></i>
+                        <span class="text-xs font-comfort">${persona.name}이가 당신의 마음을 살피고 있어요...</span>
+                    </div>
+                </div>
+            `;
+            chatMessages.insertAdjacentHTML('beforeend', loadingHtml);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return loadingId;
+        }
+
+        function removeLoadingIndicator(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        // Call Gemini API Function
+        async function callGeminiChatAPI(userMessage) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const toneDescription = {
+                polite: "존댓말로 다정하고 격식 있게 대화하세요.",
+                informal: "친근한 친구처럼 정다운 반말로 다독이며 대화하세요.",
+                empathy: "매우 부드럽고 따뜻하게, 무조건적인 깊은 공감과 온기를 담아 대화하세요."
+            }[currentTone];
+
+            const moodContext = selectedMoodTags.length > 0 ? `사용자가 느낍니다: [${selectedMoodTags.join(', ')}].` : '';
+
+            const systemPrompt = `당신은 심리적 안정감을 주는 전문 AI 상담사 '${personas[currentPersona].name}'입니다.
+특징: ${personas[currentPersona].role}
+말투: ${toneDescription}
+${moodContext}
+
+안내 사항:
+- 사용자의 감정에 깊이 공감해주고 심리적 안정감을 느끼도록 하세요.
+- 답변은 너무 길지 않게 3-4문장 내외로 따뜻하고 편안하게 전달하세요.
+- 비판이나 성급한 조언보다는 먼저 마음을 다독여주세요.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userMessage }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!replyText) throw new Error("No response from API");
+
+            return replyText;
+        }
+
+        // Fallback offline responses if API key or net fails
+        function getFallbackResponse(text) {
+            const personaName = personas[currentPersona].name;
+            const endings = {
+                polite: "당신의 마음이 조금이나마 가벼워질 수 있도록 늘 곁에서 들어드릴게요.",
+                informal: "내가 항상 네 편인 거 알지? 언제든 또 이야기해줘.",
+                empathy: "정말 고생 많았어요. 토닥토닥, 오늘은 당신 자신을 꼭 안아주세요."
+            };
+            return `이야기를 나누어 주셔서 고마워요. '${text.substring(0, 15)}...'하며 마음고생이 많으셨겠어요. ${endings[currentTone]}`;
+        }
+
+        // Solution Compass Generation Function
+        async function generateSolution() {
+            const input = document.getElementById('solutionInput').value.trim();
+            if (!input) {
+                alert('해결하고 싶은 고민 상황을 입력해 주세요.');
+                return;
+            }
+
+            const btn = document.getElementById('genSolutionBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin"></i><span>나침반을 조정하는 중...</span>`;
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: `다음 고민에 대한 3단계 행동 솔루션과 마인드셋 전환 조언을 작성해주세요:\n고민: "${input}"` }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                mindset: { type: "STRING", description: "마음 다잡기를 위한 관점 전환 문장" },
+                                step1: { type: "STRING", description: "1단계: 당장 오늘 실천 가능한 작은 행동" },
+                                step2: { type: "STRING", description: "2단계: 내면의 관점 다잡기" },
+                                step3: { type: "STRING", description: "3단계: 지속 가능한 상황 대처법" }
+                            },
+                            propertyOrdering: ["mindset", "step1", "step2", "step3"]
+                        }
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                const result = JSON.parse(jsonText);
+
+                renderSolutionResult(result);
+            } catch (err) {
+                console.error(err);
+                // Fallback rendering
+                renderSolutionResult({
+                    mindset: "모든 것을 한꺼번에 바로잡으려 하지 마세요. 지금 내 통제 범위 안의 일에만 집중하는 것이 첫걸음입니다.",
+                    step1: "1. 10분간 상황과 감정을 종이에 객관적으로 받아 적어보기",
+                    step2: "2. 상대방의 반응과 나의 자존감을 분리하여 생각하기",
+                    step3: "3. 신뢰할 수 있는 사람이나 전문가와 대화하며 적절한 거리를 유지하기"
+                });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i><span>맞춤 3단계 솔루션 생성하기</span>`;
+            }
+        }
+
+        function renderSolutionResult(data) {
+            document.getElementById('solutionMindset').innerText = data.mindset;
+            const stepsContainer = document.getElementById('solutionSteps');
+            stepsContainer.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-sage-100 dark:border-slate-700 space-y-2">
+                    <span class="text-xs font-bold text-sage-600 dark:text-sage-400">STEP 1. 지금 당장</span>
+                    <p class="text-sm font-comfort text-slate-700 dark:text-slate-200 leading-relaxed">${escapeHtml(data.step1)}</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-sage-100 dark:border-slate-700 space-y-2">
+                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">STEP 2. 관점 전환</span>
+                    <p class="text-sm font-comfort text-slate-700 dark:text-slate-200 leading-relaxed">${escapeHtml(data.step2)}</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-sage-100 dark:border-slate-700 space-y-2">
+                    <span class="text-xs font-bold text-sky-600 dark:text-sky-400">STEP 3. 지속적 관리</span>
+                    <p class="text-sm font-comfort text-slate-700 dark:text-slate-200 leading-relaxed">${escapeHtml(data.step3)}</p>
+                </div>
+            `;
+            document.getElementById('solutionResult').classList.remove('hidden');
+        }
+
+        // Empathy Cards Refresh Generator
+        const quotesPool = [
+            "당신은 생각보다 훨씬 더 강하며, 지금까지도 잘 견뎌왔습니다.",
+            "오늘 하루도 애쓴 나 자신에게 따뜻한 차 한 잔과 칭찬을 선물하세요.",
+            "실수해도 괜찮습니다. 그것은 실패가 아닌 배움의 과정일 뿐입니다.",
+            "마음의 그늘이 길다면, 그만큼 당신의 빛이 가까이 있다는 뜻입니다.",
+            "지금 힘들다고 해서 당신의 삶 전체가 흔들리는 것은 아닙니다."
+        ];
+
+        function generateEmpathyCard() {
+            const container = document.getElementById('galleryCards');
+            const randomQuote = quotesPool[Math.floor(Math.random() * quotesPool.length)];
+            const cardHtml = `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-sage-100 dark:border-slate-700 space-y-4 hover:shadow-md transition animate-fadeIn">
+                    <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-between justify-between">
+                        <span>✨ 마음 선물 카드</span>
+                        <i class="fa-solid fa-sparkles text-emerald-300"></i>
+                    </div>
+                    <p class="font-comfort text-base text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                        "${randomQuote}"
+                    </p>
+                    <div class="pt-3 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-400 flex justify-between items-center">
+                        <span>#오늘의_위로</span>
+                        <button onclick="copyQuote(this)" class="hover:text-sage-600 transition"><i class="fa-regular fa-copy mr-1"></i>복사</button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('afterbegin', cardHtml);
+        }
+
+        function copyQuote(btn) {
+            const card = btn.closest('.bg-white, .dark\\:bg-slate-800');
+            const quoteText = card.querySelector('p').innerText;
+            
+            // Clipboard copy implementation
+            const tempInput = document.createElement('textarea');
+            tempInput.value = quoteText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            btn.innerHTML = `<i class="fa-solid fa-check mr-1 text-emerald-500"></i>복사됨`;
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fa-regular fa-copy mr-1"></i>복사`;
+            }, 2000);
+        }
+
+        // Interactive 4-7-8 Breathing Technique
+        function toggleBreathing() {
+            const statusEl = document.getElementById('breatheStatus');
+            const bgEl = document.getElementById('breatheBg');
+            const btn = document.getElementById('breatheStartBtn');
+
+            if (isBreathingRunning) {
+                // Stop breathing
+                clearInterval(breatheInterval);
+                isBreathingRunning = false;
+                statusEl.innerText = '준비';
+                bgEl.classList.remove('animate-breathe');
+                btn.innerText = '호흡 가이드 시작';
+                btn.classList.replace('bg-rose-500', 'bg-sage-500');
+            } else {
+                // Start breathing loop (4s Inhale, 7s Hold, 8s Exhale)
+                isBreathingRunning = true;
+                btn.innerText = '호흡 가이드 멈춤';
+                btn.classList.replace('bg-sage-500', 'bg-rose-500');
+                bgEl.classList.add('animate-breathe');
+
+                runBreathingCycle();
+            }
+        }
+
+        function runBreathingCycle() {
+            const statusEl = document.getElementById('breatheStatus');
+            let phase = 0; // 0: inhale, 1: hold, 2: exhale
+
+            const cycle = () => {
+                if (!isBreathingRunning) return;
+                if (phase === 0) {
+                    statusEl.innerText = '숨 들이쉬기 (4초)';
+                    phase = 1;
+                    setTimeout(cycle, 4000);
+                } else if (phase === 1) {
+                    statusEl.innerText = '숨 멈추기 (7초)';
+                    phase = 2;
+                    setTimeout(cycle, 7000);
+                } else {
+                    statusEl.innerText = '숨 내쉬기 (8초)';
+                    phase = 0;
+                    setTimeout(cycle, 8000);
+                }
+            };
+            cycle();
+        }
+
+        // Chart.js Emotion Tracker Integration
+        function initEmotionChart() {
+            const ctx = document.getElementById('emotionChart').getContext('2d');
+            
+            const labels = emotionLogs.map(l => l.day);
+            const dataScores = emotionLogs.map(l => l.score);
+
+            emotionChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '마음 기온 (1~5점)',
+                        data: dataScores,
+                        borderColor: '#688e6b',
+                        backgroundColor: 'rgba(104, 142, 107, 0.15)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#527455',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 1,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    const moods = {1: '⚡ 1점', 2: '🌧️ 2점', 3: '😐 3점', 4: '🙂 4점', 5: '😊 5점'};
+                                    return moods[value] || value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function logMood() {
+            const score = parseInt(document.getElementById('moodSelect').value);
+            const note = document.getElementById('moodNote').value.trim() || '기록 없음';
+
+            // Add new log
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            const todayName = days[new Date().getDay()];
+
+            emotionLogs.push({ day: todayName, score: score, note: note });
+            if (emotionLogs.length > 7) emotionLogs.shift();
+
+            // Update Chart
+            emotionChartInstance.data.labels = emotionLogs.map(l => l.day);
+            emotionChartInstance.data.datasets[0].data = emotionLogs.map(l => l.score);
+            emotionChartInstance.update();
+
+            document.getElementById('moodNote').value = '';
+
+            // Update insight text
+            const avgScore = (emotionLogs.reduce((acc, curr) => acc + curr.score, 0) / emotionLogs.length).toFixed(1);
+            document.getElementById('emotionInsightText').innerText = 
+                `마지막 기록 반영 완료! 평균 마음 기온은 ${avgScore}점입니다. 지속해서 마음을 다독여주세요.`;
+        }
+
+        // Safety Modal Handlers
+        function openSafetyModal() {
+            document.getElementById('safetyModal').classList.remove('hidden');
+            document.getElementById('safetyModal').classList.add('flex');
+        }
+
+        function closeSafetyModal() {
+            document.getElementById('safetyModal').classList.add('hidden');
+            document.getElementById('safetyModal').classList.remove('flex');
+        }
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        // HTML Escape Helper
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
