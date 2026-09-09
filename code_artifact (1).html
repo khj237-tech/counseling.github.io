@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘 뭐 먹지? - 베이커리 에디션 🥐</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Tone.js for Web Audio Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Sunflower:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Gowun Dodum', sans-serif;
+            background-color: #FAF5EF;
+            color: #4A3B32;
+        }
+        .font-title {
+            font-family: 'Sunflower', sans-serif;
+        }
+        .bakery-card {
+            background: #FFFFFF;
+            border: 2px solid #E6D5C3;
+            box-shadow: 0 8px 20px rgba(184, 138, 98, 0.12);
+            transition: all 0.25s ease-in-out;
+        }
+        .bakery-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(184, 138, 98, 0.2);
+            border-color: #D4A373;
+        }
+        .btn-bakery {
+            background-color: #D4A373;
+            color: #FFFFFF;
+            transition: all 0.2s ease;
+        }
+        .btn-bakery:hover {
+            background-color: #BC8A5F;
+            transform: scale(1.02);
+        }
+        .btn-bakery:active {
+            transform: scale(0.98);
+        }
+        .tab-btn.active {
+            background-color: #D4A373;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(212, 163, 115, 0.4);
+        }
+        /* Custom scrollbar for warm bakery vibe */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F3E9DC;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4A373;
+            border-radius: 4px;
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-[#FFF9F2] border-b border-[#E6D5C3] sticky top-0 z-40 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('roulette')">
+                <span class="text-3xl">🥐</span>
+                <div>
+                    <h1 class="font-title text-2xl font-bold text-[#5C3D2E]">오늘 뭐 먹지?</h1>
+                    <p class="text-xs text-[#8C6D58]">갓 구운 빵과 함께하는 행복한 선택</p>
+                </div>
+            </div>
+            
+            <!-- Quick Sound Switch & Tray Counter -->
+            <div class="flex items-center gap-3">
+                <button id="soundToggleBtn" onclick="toggleSound()" class="px-3 py-1.5 rounded-full bg-[#F3E9DC] text-xs font-semibold hover:bg-[#E6D5C3] text-[#5C3D2E] flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                    <span id="soundText">효과음 ON</span>
+                </button>
+                <button onclick="switchTab('tray')" class="px-3 py-1.5 rounded-full bg-[#FAEDCD] border border-[#D4A373] text-xs font-bold text-[#5C3D2E] hover:bg-[#D4A373] hover:text-white transition flex items-center gap-2">
+                    <i class="fa-solid fa-basket-shopping text-sm"></i>
+                    <span>빵 바구니</span>
+                    <span id="trayBadge" class="bg-[#D4A373] text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="max-w-4xl mx-auto w-full px-4 mt-6">
+        <div class="bg-[#EFE3D3] p-1.5 rounded-2xl flex flex-wrap sm:flex-nowrap justify-between gap-1 text-sm font-medium">
+            <button onclick="switchTab('roulette')" id="tab-roulette" class="tab-btn active flex-1 py-2.5 px-3 rounded-xl transition text-center flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrows-spin"></i> 빵 룰렛
+            </button>
+            <button onclick="switchTab('worldcup')" id="tab-worldcup" class="tab-btn flex-1 py-2.5 px-3 rounded-xl transition text-center flex items-center justify-center gap-2">
+                <i class="fa-solid fa-trophy"></i> 이상형 월드컵
+            </button>
+            <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn flex-1 py-2.5 px-3 rounded-xl transition text-center flex items-center justify-center gap-2">
+                <i class="fa-solid fa-clipboard-question"></i> 맞춤 추천
+            </button>
+            <button onclick="switchTab('tray')" id="tab-tray" class="tab-btn flex-1 py-2.5 px-3 rounded-xl transition text-center flex items-center justify-center gap-2">
+                <i class="fa-solid fa-receipt"></i> 빵 바구니
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl mx-auto w-full px-4 py-6 flex-grow">
+        
+        <!-- TAB 1: ROULETTE -->
+        <section id="section-roulette" class="tab-section block">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                <!-- Roulette Canvas Column -->
+                <div class="md:col-span-7 flex flex-col items-center justify-center bg-white p-6 rounded-3xl border border-[#E6D5C3] shadow-md relative">
+                    <!-- Wheel Arrow -->
+                    <div class="absolute top-2 z-10 text-3xl text-[#BC8A5F] filter drop-shadow">
+                        <i class="fa-solid fa-caret-down"></i>
+                    </div>
+                    
+                    <div class="relative w-full max-w-[320px] aspect-square flex items-center justify-center my-2">
+                        <canvas id="rouletteCanvas" class="w-full h-full cursor-pointer transition-transform duration-300"></canvas>
+                    </div>
+
+                    <button id="spinBtn" onclick="spinWheel()" class="btn-bakery w-full py-3.5 mt-4 rounded-xl font-title text-lg font-bold shadow-lg flex items-center justify-center gap-2 animate-pulse-subtle">
+                        <i class="fa-solid fa-rotate-right"></i> 운명의 빵 룰렛 돌리기!
+                    </button>
+                </div>
+
+                <!-- Result & Filter Column -->
+                <div class="md:col-span-5 flex flex-col gap-4">
+                    <div class="bakery-card p-5 rounded-2xl">
+                        <span class="text-xs font-bold text-[#D4A373] uppercase tracking-wider">Today's Pick</span>
+                        <h2 id="rouletteResultTitle" class="font-title text-2xl font-bold mt-1 text-[#5C3D2E]">무엇이 나올까요?</h2>
+                        <div id="rouletteResultCard" class="mt-3 p-4 bg-[#FAF5EF] rounded-xl border border-[#E6D5C3] hidden">
+                            <div class="flex items-center gap-3">
+                                <span id="resIcon" class="text-4xl">🥯</span>
+                                <div>
+                                    <h3 id="resName" class="font-bold text-lg text-[#5C3D2E]">소금빵</h3>
+                                    <p id="resDesc" class="text-xs text-[#8C6D58] mt-0.5">버터의 고소함과 소금의 짭짤함이 완벽한 조화!</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex flex-wrap gap-1" id="resTags">
+                                <span class="text-[10px] bg-[#E6D5C3] text-[#5C3D2E] px-2 py-0.5 rounded-full">#겉바속촉</span>
+                            </div>
+                            <button id="addTrayFromRoulette" class="mt-3 w-full py-2 bg-[#D4A373] text-white text-xs font-bold rounded-lg hover:bg-[#BC8A5F] transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> 내 바구니에 담기
+                            </button>
+                        </div>
+                        <p id="roulettePlaceholder" class="text-sm text-[#8C6D58] mt-2">
+                            버튼을 눌러 오늘 먹을 빵을 랜덤으로 추천받아 보세요!
+                        </p>
+                    </div>
+
+                    <!-- Category Selector for Wheel -->
+                    <div class="bakery-card p-5 rounded-2xl">
+                        <h3 class="font-title text-base font-bold text-[#5C3D2E] mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-[#D4A373]"></i> 룰렛 테마 선택
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <button onclick="changeWheelCategory('all')" class="cat-btn p-2 rounded-lg border border-[#D4A373] bg-[#FAEDCD] font-bold text-[#5C3D2E] text-left">
+                                🥐 전체 빵 모음
+                            </button>
+                            <button onclick="changeWheelCategory('sweet')" class="cat-btn p-2 rounded-lg border border-[#E6D5C3] hover:bg-[#FAF5EF] text-[#5C3D2E] text-left">
+                                🍰 디저트/달콤류
+                            </button>
+                            <button onclick="changeWheelCategory('savory')" class="cat-btn p-2 rounded-lg border border-[#E6D5C3] hover:bg-[#FAF5EF] text-[#5C3D2E] text-left">
+                                🥪 짭짤/식사대용
+                            </button>
+                            <button onclick="changeWheelCategory('classic')" class="cat-btn p-2 rounded-lg border border-[#E6D5C3] hover:bg-[#FAF5EF] text-[#5C3D2E] text-left">
+                                🥖 담백/스테디셀러
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: BAKERY WORLDCUP -->
+        <section id="section-worldcup" class="tab-section hidden">
+            <div class="bg-white p-6 rounded-3xl border border-[#E6D5C3] shadow-md text-center max-w-2xl mx-auto">
+                <div class="mb-4">
+                    <span class="text-xs font-bold text-[#D4A373] tracking-widest uppercase">Bakery Ideal Type World Cup</span>
+                    <h2 class="font-title text-2xl font-bold text-[#5C3D2E] mt-1" id="wcStageTitle">빵 이상형 월드컵 8강</h2>
+                    <p class="text-xs text-[#8C6D58] mt-1">오늘 당신의 본능이 끌리는 빵을 선택하세요!</p>
+                </div>
+
+                <!-- Match Container -->
+                <div id="wcMatchContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+                    <!-- Left Candidate -->
+                    <div id="wcCard0" onclick="selectCandidate(0)" class="bakery-card p-6 rounded-2xl cursor-pointer hover:border-[#D4A373] flex flex-col items-center justify-between group">
+                        <div class="text-6xl my-4 group-hover:scale-110 transition" id="wcIcon0">🥐</div>
+                        <div>
+                            <h3 class="font-title text-xl font-bold text-[#5C3D2E]" id="wcName0">크루아상</h3>
+                            <p class="text-xs text-[#8C6D58] mt-1" id="wcDesc0">겹겹이 부드러운 버터 풍미</p>
+                        </div>
+                        <span class="mt-4 px-4 py-1.5 bg-[#FAF5EF] group-hover:bg-[#D4A373] group-hover:text-white rounded-full text-xs font-bold transition text-[#5C3D2E]">이 빵 선택하기</span>
+                    </div>
+
+                    <!-- Right Candidate -->
+                    <div id="wcCard1" onclick="selectCandidate(1)" class="bakery-card p-6 rounded-2xl cursor-pointer hover:border-[#D4A373] flex flex-col items-center justify-between group">
+                        <div class="text-6xl my-4 group-hover:scale-110 transition" id="wcIcon1">🥯</div>
+                        <div>
+                            <h3 class="font-title text-xl font-bold text-[#5C3D2E]" id="wcName1">소금빵</h3>
+                            <p class="text-xs text-[#8C6D58] mt-1" id="wcDesc1">단짠 고소함의 대명사</p>
+                        </div>
+                        <span class="mt-4 px-4 py-1.5 bg-[#FAF5EF] group-hover:bg-[#D4A373] group-hover:text-white rounded-full text-xs font-bold transition text-[#5C3D2E]">이 빵 선택하기</span>
+                    </div>
+                </div>
+
+                <!-- Worldcup Winner Screen (Initially Hidden) -->
+                <div id="wcWinnerContainer" class="hidden py-6">
+                    <div class="text-xs font-bold text-[#D4A373] uppercase tracking-widest">Ultimate Winner</div>
+                    <div class="text-7xl my-4 animate-bounce" id="wcWinnerIcon">🏆</div>
+                    <h3 class="font-title text-3xl font-bold text-[#5C3D2E]" id="wcWinnerName">크루아상</h3>
+                    <p class="text-sm text-[#8C6D58] mt-2 max-w-md mx-auto" id="wcWinnerDesc">오늘 당신의 마음을 사로잡은 최고의 빵입니다!</p>
+                    
+                    <div class="mt-6 flex justify-center gap-3">
+                        <button onclick="initWorldcup()" class="px-5 py-2.5 bg-[#E6D5C3] hover:bg-[#D4A373] hover:text-white text-[#5C3D2E] text-sm font-bold rounded-xl transition">
+                            <i class="fa-solid fa-rotate-left"></i> 다시 겨루기
+                        </button>
+                        <button id="addWinnerToTrayBtn" class="btn-bakery px-5 py-2.5 text-sm font-bold rounded-xl">
+                            <i class="fa-solid fa-basket-shopping"></i> 바구니에 담기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: CUSTOM QUIZ -->
+        <section id="section-quiz" class="tab-section hidden">
+            <div class="bg-white p-6 rounded-3xl border border-[#E6D5C3] shadow-md max-w-2xl mx-auto">
+                <div class="text-center mb-6">
+                    <span class="text-xs font-bold text-[#D4A373] tracking-widest uppercase">Mood & Taste Test</span>
+                    <h2 class="font-title text-2xl font-bold text-[#5C3D2E] mt-1">오늘의 기분 맞춤 빵 추천</h2>
+                    <p class="text-xs text-[#8C6D58] mt-1">몇 가지 간단한 질문으로 지금 딱 맞는 빵을 찾아드릴게요!</p>
+                </div>
+
+                <!-- Quiz Progress Bar -->
+                <div class="w-full bg-[#FAF5EF] h-2 rounded-full mb-6 overflow-hidden">
+                    <div id="quizProgress" class="bg-[#D4A373] h-full w-1/3 transition-all duration-300"></div>
+                </div>
+
+                <!-- Step 1 -->
+                <div id="quizStep1" class="quiz-step">
+                    <h3 class="font-title text-lg font-bold text-[#5C3D2E] mb-4 text-center">Q1. 지금 당장 입안에서 느껴졌으면 하는 맛은?</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(1, 'sweet')" class="bakery-card p-4 rounded-xl text-left hover:bg-[#FAEDCD] flex items-center gap-3">
+                            <span class="text-2xl">🍯</span>
+                            <div>
+                                <div class="font-bold text-sm text-[#5C3D2E]">달콤하고 부드러운 맛</div>
+                                <div class="text-[11px] text-[#8C6D58]">당 충전이 필요해! 초코, 잼, 크림 등</div>
+                            </div>
+                        </button>
+                        <button onclick="answerQuiz(1, 'savory')" class="bakery-card p-4 rounded-xl text-left hover:bg-[#FAEDCD] flex items-center gap-3">
+                            <span class="text-2xl">🧀</span>
+                            <div>
+                                <div class="font-bold text-sm text-[#5C3D2E]">짭조름하고 고소한 맛</div>
+                                <div class="text-[11px] text-[#8C6D58]">출출함을 달래줄 치즈, 버터, 마늘 등</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div id="quizStep2" class="quiz-step hidden">
+                    <h3 class="font-title text-lg font-bold text-[#5C3D2E] mb-4 text-center">Q2. 선호하는 식감은 어떤가요?</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(2, 'crispy')" class="bakery-card p-4 rounded-xl text-left hover:bg-[#FAEDCD] flex items-center gap-3">
+                            <span class="text-2xl">🥖</span>
+                            <div>
+                                <div class="font-bold text-sm text-[#5C3D2E]">바삭바삭 or 겉바속촉</div>
+                                <div class="text-[11px] text-[#8C6D58]">씹는 재미가 있는 파이, 페스츄리, 바게트</div>
+                            </div>
+                        </button>
+                        <button onclick="answerQuiz(2, 'soft')" class="bakery-card p-4 rounded-xl text-left hover:bg-[#FAEDCD] flex items-center gap-3">
+                            <span class="text-2xl">🍞</span>
+                            <div>
+                                <div class="font-bold text-sm text-[#5C3D2E]">폭신폭신 or 쫀득쫀득</div>
+                                <div class="text-[11px] text-[#8C6D58]">입안에서 녹거나 쫄깃한 식빵, 베이글</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div id="quizStep3" class="quiz-step hidden">
+                    <h3 class="font-title text-lg font-bold text-[#5C3D2E] mb-4 text-center">Q3. 어떤 목적으로 드시나요?</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(3, 'meal')" class="bakery-card p-4 rounded-xl text-left hover:bg-[#FAEDCD] flex items-center gap-3">
+                            <span class="text-2xl">☕</span>
+                            <div>
+                                <div class="font-bold text-sm text-[#5C3D2E]">식사 대용으로 든든하게</div>
+                                <div class="text-[11px] text-[#8C6D58]">한 끼 식사로 충분한 샌드위치, 속 알찬 빵</div>
+                            </div>
+                        </button>
+                        <button onclick="answerQuiz(3, 'snack')" class="bakery-card p-4 rounded-xl text-left hover:bg-[#FAEDCD] flex items-center gap-3">
+                            <span class="text-2xl">🍪</span>
+                            <div>
+                                <div class="font-bold text-sm text-[#5C3D2E]">음료와 함께 즐기는 간식</div>
+                                <div class="text-[11px] text-[#8C6D58]">커피/우유와 잘 어울리는 디저트 구움과자</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Result -->
+                <div id="quizResult" class="quiz-step hidden text-center">
+                    <div class="p-6 bg-[#FAF5EF] rounded-2xl border border-[#E6D5C3]">
+                        <span class="text-xs font-bold text-[#D4A373]">당신만을 위한 찰떡 베이커리</span>
+                        <div id="quizResultIcon" class="text-6xl my-3">🧁</div>
+                        <h3 id="quizResultName" class="font-title text-2xl font-bold text-[#5C3D2E]">휘낭시에</h3>
+                        <p id="quizResultDesc" class="text-xs text-[#8C6D58] mt-2 max-w-sm mx-auto">겉은 바삭하고 속은 쫀득한 버터 풍미 가득한 디저트!</p>
+                        
+                        <div class="mt-6 flex justify-center gap-3">
+                            <button onclick="resetQuiz()" class="px-4 py-2 bg-[#E6D5C3] text-[#5C3D2E] text-xs font-bold rounded-lg hover:bg-[#D4A373] hover:text-white transition">
+                                다시 테스트하기
+                            </button>
+                            <button id="addQuizToTrayBtn" class="btn-bakery px-4 py-2 text-xs font-bold rounded-lg">
+                                바구니에 담기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: BAKERY TRAY / RECEIPT -->
+        <section id="section-tray" class="tab-section hidden">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <!-- Tray Items List -->
+                <div class="md:col-span-7 bg-white p-6 rounded-3xl border border-[#E6D5C3] shadow-md">
+                    <div class="flex items-center justify-between mb-4 border-b border-[#E6D5C3] pb-3">
+                        <h2 class="font-title text-xl font-bold text-[#5C3D2E] flex items-center gap-2">
+                            <i class="fa-solid fa-basket-shopping text-[#D4A373]"></i> 내가 담은 빵 목록
+                        </h2>
+                        <button onclick="clearTray()" class="text-xs text-red-500 hover:underline">
+                            <i class="fa-regular fa-trash-can"></i> 전체 비우기
+                        </button>
+                    </div>
+
+                    <div id="trayItemsContainer" class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                        <!-- Items rendered via JS -->
+                    </div>
+
+                    <div id="emptyTrayMsg" class="py-12 text-center text-[#8C6D58]">
+                        <div class="text-5xl mb-2 opacity-50">🧺</div>
+                        <p class="text-sm font-medium">아직 바구니가 비어있어요!</p>
+                        <p class="text-xs text-gray-400 mt-1">룰렛, 이상형 월드컵, 추천 기능을 통해 빵을 담아보세요.</p>
+                    </div>
+                </div>
+
+                <!-- Receipt Output -->
+                <div class="md:col-span-5">
+                    <div class="bg-[#FFFDF9] p-6 rounded-2xl border-2 border-dashed border-[#D4A373] shadow-lg relative font-mono text-xs text-[#332219]">
+                        <div class="text-center pb-4 border-b border-dashed border-[#D4A373] mb-4">
+                            <h3 class="font-title text-lg font-bold text-[#5C3D2E]">🍞 행복 베이커리 🥐</h3>
+                            <p class="text-[10px] text-[#8C6D58] mt-0.5">오늘의 행복 영수증</p>
+                            <p class="text-[10px] text-gray-400 mt-1" id="receiptDate">2026.08.31 12:00:00</p>
+                        </div>
+
+                        <div id="receiptList" class="space-y-2 min-h-[120px]">
+                            <!-- Receipt Lines -->
+                        </div>
+
+                        <div class="border-t border-dashed border-[#D4A373] pt-3 mt-4 space-y-1">
+                            <div class="flex justify-between font-bold text-sm text-[#5C3D2E]">
+                                <span>총 칼로리(추정)</span>
+                                <span id="totalCalories">0 kcal</span>
+                            </div>
+                            <div class="flex justify-between text-[11px] text-[#8C6D58]">
+                                <span>행복 지수</span>
+                                <span>1000% 💖</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 text-center">
+                            <p class="text-[10px] text-[#8C6D58] mb-3">맛있게 드시면 0칼로리!</p>
+                            <button onclick="shareReceipt()" class="w-full py-2.5 bg-[#5C3D2E] text-white rounded-xl font-sans font-bold text-xs hover:bg-[#4A3B32] transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-copy"></i> 영수증 클립보드 복사
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#EFE3D3] border-t border-[#E6D5C3] py-4 text-center text-xs text-[#8C6D58] mt-8">
+        <p>🥖 오늘 뭐 먹지? 베이커리 에디션 &copy; 2026 | 맛있는 하루 보내세요! 🎉</p>
+    </footer>
+
+    <script>
+        // Global Bakery Database
+        const BAKERY_ITEMS = [
+            { id: 'salt', name: '소금빵', icon: '🥯', desc: '버터의 고소함과 고스란히 느껴지는 짭짤한 소금의 조화', cat: ['savory', 'classic'], tags: ['#겉바속촉', '#단짠고소', '#대세'], cal: 210 },
+            { id: 'croissant', name: '크루아상', icon: '🥐', desc: '겹겹이 찢어지는 부드럽고 가벼운 바삭함과 풍부한 버터향', cat: ['classic', 'savory'], tags: ['#버터풍미', '#결대로', '#프랑스 감성'], cal: 260 },
+            { id: 'bagel', name: '베이글 & 크림치즈', icon: '🥯', desc: '쫄깃하고 든든한 베이글에 부드러운 크림치즈 듬뿍', cat: ['savory', 'classic'], tags: ['#든든함', '#브런치', '#쫄깃'], cal: 350 },
+            { id: 'eggtart', name: '에그타르트', icon: '🥧', desc: '바삭한 페스츄리 속 달콤하고 푸딩처럼 부드러운 에그 커스터드', cat: ['sweet'], tags: ['#달콤', '#사르르', '#커스터드'], cal: 220 },
+            { id: 'garlic', name: '마늘 바게트', icon: '🥖', desc: '알싸하고 달달한 마늘 소스가 빵 속까지 듬뿍 촉촉하게', cat: ['savory'], tags: ['#마늘향', '#달콤짭짤', '#중독성'], cal: 380 },
+            { id: 'redbean', name: '단팥빵', icon: '🫓', desc: '달콤한 팥앙금이 가득 들어있는 영원한 스테디셀러', cat: ['sweet', 'classic'], tags: ['#추억의맛', '#달달', '#클래식'], cal: 280 },
+            { id: 'scone', name: '스콘 & 딸기잼', icon: '🧈', desc: '고소하고 퍽퍽 매력의 스콘에 달콤한 딸기잼 한 스푼', cat: ['sweet', 'classic'], tags: ['#담백', '#커피짝꿍', '#영국식'], cal: 310 },
+            { id: 'financier', name: '휘낭시에', icon: '🧁', desc: '태운 버터의 밀도 높고 고소한 풍미와 겉바속쫀득의 식감', cat: ['sweet'], tags: ['#겉바속쫀', '#고급디저트', '#풍미'], cal: 190 },
+            { id: 'sandwich', name: '샌드위치', icon: '🥪', desc: '신선한 야채와 햄, 치즈가 조화로운 완벽한 식사 대용', cat: ['savory'], tags: ['#신선', '#식사대용', '#아삭'], cal: 420 },
+            { id: 'melonpan', name: '메론빵', icon: '🍈', desc: '달콤바삭한 쿠키 도우가 감싸진 고소하고 귀여운 일본식 빵', cat: ['sweet'], tags: ['#귀여움', '#달콤바삭', '#특별함'], cal: 290 },
+            { id: 'pretzel', name: '버터 프레첼', icon: '🥨', desc: '쫄깃한 가르니솔트 프레첼 사이에 두꺼운 버터 한 조각', cat: ['savory', 'classic'], tags: ['#버터폭발', '#짭조름', '#독일풍'], cal: 330 },
+            { id: 'ciabatta', name: '치아바타', icon: '🍞', desc: '담백함의 끝판왕, 올리브유에 찍어 먹기 좋은 건강한 빵', cat: ['classic', 'savory'], tags: ['#담백', '#건강한맛', '#발효빵'], cal: 210 }
+        ];
+
+        // State Variables
+        let currentWheelCategory = 'all';
+        let wheelItems = [...BAKERY_ITEMS];
+        let soundEnabled = true;
+        let isSpinning = false;
+        let selectedRouletteItem = null;
+        let myTray = [];
+
+        // Sound Effects Engine via Tone.js
+        function playClickSound() {
+            if (!soundEnabled) return;
+            try {
+                const synth = new Tone.Synth({
+                    oscillator: { type: 'sine' },
+                    envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }
+                }).toDestination();
+                synth.volume.value = -12;
+                synth.triggerAttackRelease("C6", "16n");
+            } catch(e) {}
+        }
+
+        function playSpinTick() {
+            if (!soundEnabled) return;
+            try {
+                const synth = new Tone.MembraneSynth().toDestination();
+                synth.volume.value = -18;
+                synth.triggerAttackRelease("G2", "32n");
+            } catch(e) {}
+        }
+
+        function playVictorySound() {
+            if (!soundEnabled) return;
+            try {
+                const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                synth.volume.value = -8;
+                const now = Tone.now();
+                synth.triggerAttackRelease("C5", "8n", now);
+                synth.triggerAttackRelease("E5", "8n", now + 0.1);
+                synth.triggerAttackRelease("G5", "8n", now + 0.2);
+                synth.triggerAttackRelease("C6", "4n", now + 0.3);
+            } catch(e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                text.innerText = '효과음 ON';
+                Tone.start();
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                text.innerText = '효과음 OFF';
+            }
+        }
+
+        // Tab Navigation Logic
+        function switchTab(tabId) {
+            playClickSound();
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(`section-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            if (tabId === 'worldcup' && wcCandidates.length === 0) {
+                initWorldcup();
+            }
+        }
+
+        // ROULETTE WHEEL ENGINE
+        const canvas = document.getElementById('rouletteCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentAngle = 0;
+
+        function resizeCanvas() {
+            const size = canvas.parentElement.clientWidth;
+            canvas.width = size * 2; // High DPI
+            canvas.height = size * 2;
+            drawWheel();
+        }
+
+        const WARM_COLORS = ['#F4A261', '#E76F51', '#E9C46A', '#D4A373', '#FAEDCD', '#CCD5AE', '#E8AC65', '#D08C60'];
+
+        function drawWheel() {
+            if (!ctx) return;
+            const width = canvas.width;
+            const height = canvas.height;
+            const radius = width / 2 - 20;
+            const numItems = wheelItems.length;
+            const arc = (Math.PI * 2) / numItems;
+
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.translate(width / 2, height / 2);
+
+            for (let i = 0; i < numItems; i++) {
+                const angle = currentAngle + i * arc;
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, angle, angle + arc);
+                ctx.lineTo(0, 0);
+                ctx.fillStyle = WARM_COLORS[i % WARM_COLORS.length];
+                ctx.fill();
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                // Text & Icon
+                ctx.save();
+                ctx.rotate(angle + arc / 2);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#4A3B32';
+                ctx.font = 'bold 28px "Sunflower", sans-serif';
+                ctx.fillText(`${wheelItems[i].icon} ${wheelItems[i].name}`, radius - 30, 10);
+                ctx.restore();
+            }
+
+            // Center Knob
+            ctx.beginPath();
+            ctx.arc(0, 0, 35, 0, Math.PI * 2);
+            ctx.fillStyle = '#5C3D2E';
+            ctx.fill();
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 6;
+            ctx.stroke();
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🍞', 0, 2);
+
+            ctx.restore();
+        }
+
+        function changeWheelCategory(cat) {
+            playClickSound();
+            currentWheelCategory = cat;
+            if (cat === 'all') {
+                wheelItems = [...BAKERY_ITEMS];
+            } else {
+                wheelItems = BAKERY_ITEMS.filter(item => item.cat.includes(cat));
+            }
+            // Update button styles
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-[#FAEDCD]', 'border-[#D4A373]', 'font-bold');
+                btn.classList.add('border-[#E6D5C3]');
+            });
+            event.currentTarget.classList.add('bg-[#FAEDCD]', 'border-[#D4A373]', 'font-bold');
+            drawWheel();
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            Tone.start();
+            isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('roulettePlaceholder').classList.add('hidden');
+            document.getElementById('rouletteResultCard').classList.add('hidden');
+
+            const spinRounds = 5 + Math.random() * 5;
+            const totalRotation = spinRounds * Math.PI * 2 + Math.random() * Math.PI * 2;
+            const startAngle = currentAngle;
+            const startTime = performance.now();
+            const duration = 3500; // 3.5s
+
+            let lastTickSegment = -1;
+
+            function animate(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // Ease out cubic
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                currentAngle = startAngle + totalRotation * easeOut;
+
+                // Sound tick calculation
+                const numItems = wheelItems.length;
+                const arc = (Math.PI * 2) / numItems;
+                const currentSegment = Math.floor(((Math.PI * 2.5 - (currentAngle % (Math.PI * 2))) % (Math.PI * 2)) / arc);
+                if (currentSegment !== lastTickSegment) {
+                    playSpinTick();
+                    lastTickSegment = currentSegment;
+                }
+
+                drawWheel();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isSpinning = false;
+                    document.getElementById('spinBtn').disabled = false;
+                    finishSpin();
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function finishSpin() {
+            const numItems = wheelItems.length;
+            const arc = (Math.PI * 2) / numItems;
+            // Top pointer is at -Math.PI / 2 (or 3PI/2)
+            const normalizedAngle = (Math.PI * 2.5 - (currentAngle % (Math.PI * 2))) % (Math.PI * 2);
+            const selectedIndex = Math.floor(normalizedAngle / arc) % numItems;
+            const item = wheelItems[selectedIndex];
+            selectedRouletteItem = item;
+
+            // Display Result
+            document.getElementById('resIcon').innerText = item.icon;
+            document.getElementById('resName').innerText = item.name;
+            document.getElementById('resDesc').innerText = item.desc;
+            
+            const tagsContainer = document.getElementById('resTags');
+            tagsContainer.innerHTML = item.tags.map(t => `<span class="text-[10px] bg-[#E6D5C3] text-[#5C3D2E] px-2 py-0.5 rounded-full">${t}</span>`).join('');
+
+            document.getElementById('addTrayFromRoulette').onclick = () => addToTray(item);
+            document.getElementById('rouletteResultCard').classList.remove('hidden');
+            document.getElementById('rouletteResultTitle').innerText = '🎉 오늘의 추천!';
+
+            playVictorySound();
+            confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+        }
+
+        // WORLDCUP ENGINE
+        let wcCandidates = [];
+        let wcCurrentRound = [];
+        let wcNextRound = [];
+        let wcMatchIndex = 0;
+
+        function initWorldcup() {
+            // Shuffle array
+            wcCandidates = [...BAKERY_ITEMS].sort(() => 0.5 - Math.random()).slice(0, 8); // 8-round
+            wcCurrentRound = [...wcCandidates];
+            wcNextRound = [];
+            wcMatchIndex = 0;
+
+            document.getElementById('wcMatchContainer').classList.remove('hidden');
+            document.getElementById('wcWinnerContainer').classList.add('hidden');
+            renderWcMatch();
+        }
+
+        function renderWcMatch() {
+            const totalMatches = wcCurrentRound.length / 2;
+            const stageText = wcCurrentRound.length === 2 ? '결승전 (1/1)' : `${wcCurrentRound.length}강 (${wcMatchIndex + 1}/${totalMatches})`;
+            document.getElementById('wcStageTitle').innerText = `빵 이상형 월드컵 ${stageText}`;
+
+            const item0 = wcCurrentRound[wcMatchIndex * 2];
+            const item1 = wcCurrentRound[wcMatchIndex * 2 + 1];
+
+            document.getElementById('wcIcon0').innerText = item0.icon;
+            document.getElementById('wcName0').innerText = item0.name;
+            document.getElementById('wcDesc0').innerText = item0.desc;
+
+            document.getElementById('wcIcon1').innerText = item1.icon;
+            document.getElementById('wcName1').innerText = item1.name;
+            document.getElementById('wcDesc1').innerText = item1.desc;
+        }
+
+        function selectCandidate(index) {
+            playClickSound();
+            const selected = wcCurrentRound[wcMatchIndex * 2 + index];
+            wcNextRound.push(selected);
+
+            wcMatchIndex++;
+            if (wcMatchIndex * 2 >= wcCurrentRound.length) {
+                // Round complete
+                if (wcNextRound.length === 1) {
+                    // Winner!
+                    showWcWinner(wcNextRound[0]);
+                } else {
+                    wcCurrentRound = [...wcNextRound];
+                    wcNextRound = [];
+                    wcMatchIndex = 0;
+                    renderWcMatch();
+                }
+            } else {
+                renderWcMatch();
+            }
+        }
+
+        function showWcWinner(winner) {
+            document.getElementById('wcMatchContainer').classList.add('hidden');
+            document.getElementById('wcWinnerContainer').classList.remove('hidden');
+            document.getElementById('wcStageTitle').innerText = '🎉 최종 우승 빵!';
+
+            document.getElementById('wcWinnerIcon').innerText = winner.icon;
+            document.getElementById('wcWinnerName').innerText = winner.name;
+            document.getElementById('wcWinnerDesc').innerText = winner.desc;
+
+            document.getElementById('addWinnerToTrayBtn').onclick = () => addToTray(winner);
+
+            playVictorySound();
+            confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
+        }
+
+        // QUIZ RECOMMENDATION ENGINE
+        let quizAnswers = {};
+
+        function answerQuiz(step, value) {
+            playClickSound();
+            quizAnswers[step] = value;
+
+            document.getElementById(`quizStep${step}`).classList.add('hidden');
+
+            if (step < 3) {
+                document.getElementById(`quizStep${step + 1}`).classList.remove('hidden');
+                document.getElementById('quizProgress').style.width = `${((step + 1) / 3) * 100}%`;
+            } else {
+                // Calculate result
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            document.getElementById('quizProgress').style.width = '100%';
+            document.getElementById('quizResult').classList.remove('hidden');
+
+            // Recommendation matching algorithm
+            let matchedItem = BAKERY_ITEMS[0];
+            if (quizAnswers[1] === 'sweet') {
+                if (quizAnswers[2] === 'crispy') {
+                    matchedItem = BAKERY_ITEMS.find(i => i.id === 'eggtart') || BAKERY_ITEMS[3];
+                } else {
+                    matchedItem = BAKERY_ITEMS.find(i => i.id === 'financier') || BAKERY_ITEMS[7];
+                }
+            } else {
+                if (quizAnswers[3] === 'meal') {
+                    matchedItem = BAKERY_ITEMS.find(i => i.id === 'sandwich') || BAKERY_ITEMS[8];
+                } else {
+                    matchedItem = BAKERY_ITEMS.find(i => i.id === 'salt') || BAKERY_ITEMS[0];
+                }
+            }
+
+            document.getElementById('quizResultIcon').innerText = matchedItem.icon;
+            document.getElementById('quizResultName').innerText = matchedItem.name;
+            document.getElementById('quizResultDesc').innerText = matchedItem.desc;
+            document.getElementById('addQuizToTrayBtn').onclick = () => addToTray(matchedItem);
+
+            playVictorySound();
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+        }
+
+        function resetQuiz() {
+            playClickSound();
+            quizAnswers = {};
+            document.getElementById('quizResult').classList.add('hidden');
+            document.getElementById('quizStep2').classList.add('hidden');
+            document.getElementById('quizStep3').classList.add('hidden');
+            document.getElementById('quizStep1').classList.remove('hidden');
+            document.getElementById('quizProgress').style.width = '33.3%';
+        }
+
+        // TRAY & RECEIPT ENGINE
+        function addToTray(item) {
+            playClickSound();
+            const existing = myTray.find(i => i.id === item.id);
+            if (existing) {
+                existing.count++;
+            } else {
+                myTray.push({ ...item, count: 1 });
+            }
+            updateTrayUI();
+
+            // Simple Feedback Toast
+            const badge = document.getElementById('trayBadge');
+            badge.classList.add('scale-125');
+            setTimeout(() => badge.classList.remove('scale-125'), 200);
+        }
+
+        function removeFromTray(itemId) {
+            playClickSound();
+            myTray = myTray.filter(i => i.id !== itemId);
+            updateTrayUI();
+        }
+
+        function updateCount(itemId, delta) {
+            playClickSound();
+            const item = myTray.find(i => i.id === itemId);
+            if (item) {
+                item.count += delta;
+                if (item.count <= 0) {
+                    removeFromTray(itemId);
+                } else {
+                    updateTrayUI();
+                }
+            }
+        }
+
+        function clearTray() {
+            playClickSound();
+            myTray = [];
+            updateTrayUI();
+        }
+
+        function updateTrayUI() {
+            const container = document.getElementById('trayItemsContainer');
+            const emptyMsg = document.getElementById('emptyTrayMsg');
+            const badge = document.getElementById('trayBadge');
+            const totalCount = myTray.reduce((sum, item) => sum + item.count, 0);
+
+            badge.innerText = totalCount;
+
+            if (myTray.length === 0) {
+                container.innerHTML = '';
+                emptyMsg.classList.remove('hidden');
+            } else {
+                emptyMsg.classList.add('hidden');
+                container.innerHTML = myTray.map(item => `
+                    <div class="flex items-center justify-between p-3 bg-[#FAF5EF] rounded-xl border border-[#E6D5C3]">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${item.icon}</span>
+                            <div>
+                                <h4 class="font-bold text-sm text-[#5C3D2E]">${item.name}</h4>
+                                <span class="text-[11px] text-[#8C6D58]">${item.cal * item.count} kcal</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center border border-[#D4A373] rounded-lg overflow-hidden bg-white">
+                                <button onclick="updateCount('${item.id}', -1)" class="px-2 py-0.5 text-xs text-[#5C3D2E] hover:bg-[#FAF5EF]">-</button>
+                                <span class="px-2 text-xs font-bold">${item.count}</span>
+                                <button onclick="updateCount('${item.id}', 1)" class="px-2 py-0.5 text-xs text-[#5C3D2E] hover:bg-[#FAF5EF]">+</button>
+                            </div>
+                            <button onclick="removeFromTray('${item.id}')" class="text-xs text-red-400 hover:text-red-600 p-1">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderReceipt();
+        }
+
+        function renderReceipt() {
+            const receiptList = document.getElementById('receiptList');
+            const totalCalEl = document.getElementById('totalCalories');
+            const receiptDate = document.getElementById('receiptDate');
+
+            const now = new Date();
+            receiptDate.innerText = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+            let totalCal = 0;
+
+            if (myTray.length === 0) {
+                receiptList.innerHTML = '<div class="text-center text-gray-400 py-6">선택된 빵이 없습니다.</div>';
+                totalCalEl.innerText = '0 kcal';
+                return;
+            }
+
+            receiptList.innerHTML = myTray.map(item => {
+                const itemCal = item.cal * item.count;
+                totalCal += itemCal;
+                return `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="truncate max-w-[140px]">${item.icon} ${item.name} x${item.count}</span>
+                        <span>${itemCal} kcal</span>
+                    </div>
+                `;
+            }).join('');
+
+            totalCalEl.innerText = `${totalCal} kcal`;
+        }
+
+        function shareReceipt() {
+            playClickSound();
+            if (myTray.length === 0) {
+                alert('바구니에 담긴 빵이 없습니다!');
+                return;
+            }
+
+            const itemsStr = myTray.map(i => `${i.name} (${i.count}개)`).join(', ');
+            const text = `[오늘 뭐 먹지? 베이커리 영수증 🥐]\n내가 선택한 오늘의 빵: ${itemsStr}\n오늘 맛있는 빵으로 행복 충전 완료! ✨`;
+
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            alert('영수증 내용이 클립보드에 복사되었습니다! 친구들에게 공유해보세요 🎉');
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = function() {
+            resizeCanvas();
+            initWorldcup();
+            updateTrayUI();
+        };
+    </script>
+</body>
+</html>
